@@ -6,10 +6,10 @@ let options = (folderName) => {
     const storage = multer.diskStorage({})
 
     function fileFilter(req, file, cb) {
-        if (file.mimetype.startsWith('image') || file.mimetype.startsWith('video')) {
+        if (file.mimetype.startsWith('video')) {
           cb(null, true);
         } else {
-          cb(new AppError('Images and videos only', 400), false);
+          cb(new AppError(' videos only', 400), false);
         }
       }
     const upload = multer({ storage, fileFilter })

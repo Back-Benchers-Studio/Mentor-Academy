@@ -137,19 +137,19 @@ export const sendMailtoAll = catchAsyncError(async (req, res) => {
         for (const educator of educators) {
             const emailBody = htmlBody.replace('{recipientName}', educator.name)
             console.log(emailBody);
-            //const emailPromise = sendEmail(educator.email, emailBody, subject);
-            //sendEmailPromises.push(emailPromise);
+            const emailPromise = sendEmail(educator.email, emailBody, subject);
+            sendEmailPromises.push(emailPromise);
         }
         
         // Loop through users and send email
         for (const user of users) {
             const emailBody = htmlBody.replace('{recipientName}', user.name);
             console.log(emailBody);
-           // const emailPromise = sendEmail(user.email, emailBody, subject);
-           // sendEmailPromises.push(emailPromise);
+            const emailPromise = sendEmail(user.email, emailBody, subject);
+            sendEmailPromises.push(emailPromise);
         }
 
-       // await Promise.all(sendEmailPromises);
+        await Promise.all(sendEmailPromises);
         res.status(200).json({ EmailBody, message: "You have been sent Announcement Successfully..." });
     }else{
         res.status(400).json({ message: "Please Enter Body to Your Email" });

@@ -9,9 +9,12 @@ export const sendEmail = async (email , htmlBody , subject)=>{
             secure: false, // true for 465, false for other ports
             service:"gmail",
             auth: {
-                user: process.env.SENDER_EMAIL, // generated ethereal user
-                pass: process.env.SENDER_kEY, // generated ethereal password
-            },
+                user: 'backbenchersteam23@gmail.com',
+                pass:'23@backbenchers@23Team'
+               //pass:'12345BB'
+                //user: process.env.SENDER_EMAIL, // generated ethereal user
+                //pass: process.env.SENDER_kEY, // generated ethereal password
+            }
         });
  
         // send mail with defined transport object
