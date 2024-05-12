@@ -9,5 +9,9 @@ authRouter.post("/:userType/signup",auth.signupAll)
 // authRouter.post('/signup/educator',auth.signupEducator)
 authRouter.post("/:userType/signIn",auth.signInAll)
 
+authRouter
+.route('/verifyPayment')
+.get(auth.verifyPayment)
+
 
 export default authRouter

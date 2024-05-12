@@ -11,6 +11,43 @@ import { depositModel } from "../../../Database/models/Deposit.model.js";
 import { walletModel } from "../../../Database/models/Wallet.model.js";
 const stripe = new Stripe(`${process.env.STRIPE_KEY}`);
 
+export const verifyPayment = catchAsyncError(async (req, res, next) => {
+    let sessionStripe = await stripe.checkout.sessions.retrieve(req.query.session_id, {
+        // Pass the API key in the Authorization header
+        apiKey: process.env.STRIPE_KEY,
+    });
+    console.log(sessionStripe)
+    //Check if session is paid
+    if (sessionStripe.payment_status !== 'paid') {
+        return next(new AppError('Session is not paid', 400))
+    }
+    const user = await userModel.findById(sessionStripe.client_reference_id);
+    console.log(user)
+    if (!user) {
+        return res.status(400).json({ error: 'Invalid user ID' });
+    }
+    user.paymentStatus = 'completed';
+    user.verified = true;
+    await user.save().then(async (user) => {
+        let educator = await educatorModel.findOne({ educator_id: user.educator });
+        if (!educator) {
+            return next(new AppError('Educator not found', 404));
+        }
+        // Create a wallet for the educator and link it to the educator
+        let wallet = new walletModel({ educator: educator._id, balance: 10 });
+        await wallet.save();
+        // Link the wallet to the educator
+        await educatorModel.findByIdAndUpdate(
+            educator._id,
+            { wallet: wallet._id },
+            { new: true }
+        );
+    })
+    return res.status(200).json({ message: "success" })
+})
+
+
+
 export const signupAll = catchAsyncError(async (req, res, next) => {
     let { userType } = req.params;
     let user;
@@ -37,35 +74,17 @@ export const signupAll = catchAsyncError(async (req, res, next) => {
             res.status(200).json({ Admin: newAdmin, message: "Sign Up Successful..." });
         }
         else if (userType === 'user') {
-  let educatorIsFound;
+            let educatorIsFound;
             if (req.body.educator) {
                 // Check if the educator exists
-                 educatorIsFound = await educatorModel.findOne({ educator_id: req.body.educator });
+                educatorIsFound = await educatorModel.findOne({ educator_id: req.body.educator });
                 if (!educatorIsFound) {
                     return next(new AppError('Educator not found', 404));
                 }
             }
             let newUser = new newModel(req.body);
-
-
-            // Create a wallet for the educator and link it to the educator
-            const wallet = new walletModel({ educator: educatorIsFound._id });
-            await wallet.save();
-
-            // Link the wallet to the educator
-            const educator = await educatorModel.findByIdAndUpdate(
-                educatorIsFound._id,
-                { wallet: wallet._id },
-                { new: true }
-            );
-
-            let savedUser = {};
-            await newUser.save().then((user) => {
-                savedUser = user
-                console.log(savedUser);
-
-            })
-            // await newUser.save();
+            // let savedUser = {};
+            await newUser.save();
 
             // const admins = await adminModel.find();
             // for (const admin of admins) {
@@ -77,59 +96,38 @@ export const signupAll = catchAsyncError(async (req, res, next) => {
 
             // }
 
-            const deposit = new depositModel({
-                user: savedUser._id,
-                amount: 100,
-            })
-
-            let depositID = null;
-            await deposit.save().then((dep) => {
-                depositID = dep._id.toString();
-
-            })
-            if (!deposit) {
-                return next(new AppError('error in deposit id', 404))
-            }
-
+            // Create a checkout session using the Stripe API
             let session = await stripe.checkout.sessions.create({
+                payment_method_types: ['card'],
                 line_items: [
                     {
                         price_data: {
                             currency: 'usd',
-                            unit_amount: Math.round(1000),
+                            unit_amount: 10000,
                             product_data: {
-                                name: newUser.name
-                            }
+                                name: newUser.name,
+                            },
                         },
-                        quantity: 1
-                    }
+                        quantity: 1,
+                    },
                 ],
                 mode: 'payment',
-               // success_url: "https://google.com",
-                 success_url: "http://localhost:7000/api/v1/deposits/verify?session_id={CHECKOUT_SESSION_ID}",//@todo will change
+                success_url: 'http://localhost:7000/api/v1/auth/verifyPayment?session_id={CHECKOUT_SESSION_ID}',
+                // cancel_url: 'http://localhost:7000/payment/cancel',
                 customer_email: newUser.email,
-                client_reference_id: depositID,
-
+                client_reference_id: newUser._id.toString(), // Pass the user ID as reference
             }, {
                 // Pass the API key in the Authorization header
                 apiKey: process.env.STRIPE_KEY,
             })
 
-            if (!session) {
-                return next(new AppError('Error Creating Session', 404));
-            }
-
-            deposit.session_id = session.id;
-            deposit.payment_url = session.url;
-            deposit.expires_at = session.expires_at;
-            await deposit.save();
-            console.log(session)
-
-            // res.json({ message: "success", session })
+            // Save the session ID and user ID in the database
+            newUser.paymentSessionId = session.id;
+            await newUser.save();
 
             // const html = `<a href = "${session}">Click Here To Complete Payment Step</a?`;
             // sendEmail(newUser.email, html, "Mentor Academy Registeration Payment Step")
-            res.status(200).json({ User: newUser, PaymentURL: session, message: "Sign Up Successfully...plz Complete Payment Step to be verified..." });
+            res.status(200).json({ User: newUser, PaymentURL: session.url, message: "Sign Up Successfully...plz Complete Payment Step to be verified..." });
         }
         else if (userType === 'educator') {
             let newEducator = new newModel(req.body);
@@ -140,7 +138,7 @@ export const signupAll = catchAsyncError(async (req, res, next) => {
             //     const html = `<h1>New Educator Registeration with Email ${newEducator.email}</h1>`;
             //     const subject = `New Educator Registeration`
             //     sendEmail(adminEmail, html, subject)
-                
+
             // }
             res.status(200).json({ Educator: newEducator, message: "Sign Up Successfully...." });
         }
@@ -247,46 +245,46 @@ export const signInAll = catchAsyncError(async (req, res, next) => {
 export const protectedRoutes = catchAsyncError(async (req, res, next) => {
     const { token } = req.headers;
     if (!token) {
-      return next(new AppError('Token not provided', 401));
+        return next(new AppError('Token not provided', 401));
     }
-  
+
     let decoded;
     try {
-      decoded = await jwt.verify(token, process.env.JWT_KEY);
+        decoded = await jwt.verify(token, process.env.JWT_KEY);
     } catch (err) {
-      return next(new AppError('Invalid token', 401));
+        return next(new AppError('Invalid token', 401));
     }
-  
+
     let user;
     let model;
 
     const models = {
-      userModel,
-      educatorModel,
-      adminModel
+        userModel,
+        educatorModel,
+        adminModel
     };
-  
+
     for (const modelName in models) {
-      const Model = models[modelName];
-      user = await Model.findById(decoded.userId);
-      if (user) {
-        model = Model;
-        break;
-      }
+        const Model = models[modelName];
+        user = await Model.findById(decoded.userId);
+        if (user) {
+            model = Model;
+            break;
+        }
     }
     if (!user) {
-      return next(new AppError('User not found', 401));
+        return next(new AppError('User not found', 401));
     }
     if (user.passwordChangedAt) {
-      const changePasswordDate = parseInt(user.passwordChangedAt.getTime() / 1000);
-      if (changePasswordDate > decoded.iat) {
-        return next(new AppError('Password changed', 401));
-      }
+        const changePasswordDate = parseInt(user.passwordChangedAt.getTime() / 1000);
+        if (changePasswordDate > decoded.iat) {
+            return next(new AppError('Password changed', 401));
+        }
     }
     req.user = user;
     //req.model = model; 
     next();
-  });
+});
 // export const protectedRoutes = catchAsyncError(async (req, res, next) => {
 //     let { token } = req.headers
 //     if (!token) return next(new AppError('token not provided', 401))

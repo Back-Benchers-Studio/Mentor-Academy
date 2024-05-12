@@ -6,7 +6,7 @@ import depositRouter from "./deposit/deposit.router.js"
 import adminRouter from "./admin/admin.router.js"
 import announcementRouter from "./announcement/announcement.router.js"
 import courseRouter from "./course/course.router.js"
-
+import walletRouter from "./wallet/wallet.router.js"
 export function init(app) {
   
     app.use('/api/v1/auth', authRouter)
@@ -15,6 +15,7 @@ export function init(app) {
     app.use('/api/v1/course',courseRouter)
     app.use('/api/v1/users', userRouter)
     app.use('/api/v1/deposits', depositRouter)
+    app.use('/api/v1/wallet', walletRouter)
   
 
     app.all('*', (req, res, next) => {

@@ -108,9 +108,9 @@ export const getPendingEducatorFees = catchAsyncError(async (req, res) => {
 //Accept pending educators fees:
 export const accpetPendingEducatrFees = catchAsyncError(async (req, res) => {
     const { educatorID } = req.params;
-    const { isAccpeted } = await educatorModel.findById(educatorID);
-    const educator = await educatorModel.findByIdAndUpdate(educatorID, { isAccpeted: 'true' }, { new: true });
-    if (educator && !isAccpeted) {
+    const { isFeesAccepted } = await educatorModel.findById(educatorID);
+    const educator = await educatorModel.findByIdAndUpdate(educatorID, { isFeesAccepted: 'true' }, { new: true });
+    if (educator && !isFeesAccepted) {
         //const html = `<h2>Your Request to withdraw Fees has been accepted</h2>`
         // sendEmail(educator.email ,html,"Fees Request Acceptance")
         res.status(200).json({ message: "This Educator has Been accepted", educator });

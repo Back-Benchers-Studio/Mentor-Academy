@@ -15,6 +15,15 @@ const userSchema = mongoose.Schema({
         //     return this.role === 'user';
         //   }
       },
+      paymentStatus: {
+        type: String,
+        enum: ['pending', 'completed'],
+        default: 'pending',
+      },
+      paymentSessionId: {
+        type: String,
+      },
+    
     phone: {
         type: String,
        // required: [true, 'phone number is required'],

@@ -10,7 +10,8 @@ export const sendEmail = async (email , htmlBody , subject)=>{
             service:"gmail",
             auth: {
                 user: 'backbenchersteam23@gmail.com',
-                pass:'23@backbenchers@23Team'
+                pass:'Mazen.00.00.00'
+                // pass:'23@backbenchers@23Team'
                //pass:'12345BB'
                 //user: process.env.SENDER_EMAIL, // generated ethereal user
                 //pass: process.env.SENDER_kEY, // generated ethereal password
