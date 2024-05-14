@@ -110,9 +110,16 @@ export const getAnnouncements = catchAsyncError(async (req, res) => {
   }
 
   // Sort by ascending createdAt
-  apiFeatures.mongooseQuery.sort({ createdAt: -1 });
+  // apiFeatures.mongooseQuery.sort({ createdAt: -1 });
   let announcements = await apiFeatures.mongooseQuery
   res.status(200).json({ page: apiFeatures.page, announcements });
+});
+export const getCourses = catchAsyncError(async (req, res) => {
+  let apiFeatures = new ApiFeatures(courseModel.find(), req.query).paginate()
+  // Sort by ascending createdAt
+  apiFeatures.mongooseQuery.sort({ createdAt: -1 });
+  let courses = await apiFeatures.mongooseQuery
+  res.status(200).json({ page: apiFeatures.page, courses });
 });
 
 // Update Announcement

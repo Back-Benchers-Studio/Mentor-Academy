@@ -8,7 +8,7 @@ const courseRouter = express.Router()
 
 courseRouter.route('/')
                   .post(protectedRoutes,allowedTo('admin'),uploadSingleFile('video','Courses'),course.addCourse)
-                  .get(protectedRoutes,allowedTo('admin' , 'educator' ,'user'),course.getAnnouncements)
+                  .get(protectedRoutes,allowedTo('admin' , 'educator' ,'user'),course.getCourses)
 
                   courseRouter.route('/:id').
                      patch(protectedRoutes,allowedTo('educator'),course.updateAnnouncement)
