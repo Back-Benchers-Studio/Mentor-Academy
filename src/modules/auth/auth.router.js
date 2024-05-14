@@ -9,6 +9,8 @@ authRouter.post("/:userType/signup",auth.signupAll)
 // authRouter.post('/signup/educator',auth.signupEducator)
 authRouter.post("/:userType/signIn",auth.signInAll)
 
+authRouter.post("/checkEducator",auth.checkEducator)
+
 authRouter
 .route('/verifyPayment')
 .get(auth.verifyPayment)

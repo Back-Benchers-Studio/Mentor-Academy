@@ -10,6 +10,7 @@ adminRouter
     .get(protectedRoutes,user.getAllUsers)
 
 adminRouter.post('/sendMail',protectedRoutes,allowedTo('admin'),user.sendMailtoAll) 
+adminRouter.post('/checkAdmin',protectedRoutes,allowedTo('admin'),user.checkAdmin) 
 
 adminRouter
     .route('/educators')

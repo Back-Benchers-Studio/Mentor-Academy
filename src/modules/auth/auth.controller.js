@@ -46,7 +46,17 @@ export const verifyPayment = catchAsyncError(async (req, res, next) => {
     return res.status(200).json({ message: "success" })
 })
 
-
+export const checkEducator = catchAsyncError(async (req, res, next) => {
+    let educatorIsFound;
+    if (req.body.educator) {
+        educatorIsFound = await educatorModel.findOne({ educator_id: req.body.educator });
+        if (!educatorIsFound) {
+            return next(new AppError('Educator not found', 404));
+        }else{
+            res.status(200).json({ found:true });
+        }
+    }
+})
 
 export const signupAll = catchAsyncError(async (req, res, next) => {
     let { userType } = req.params;
@@ -152,6 +162,7 @@ export const signupAll = catchAsyncError(async (req, res, next) => {
 export const signInAll = catchAsyncError(async (req, res, next) => {
     let { userType } = req.params;
     const { email, password } = req.body
+    console.log('fortest',req)
     let user;
     let newModel;
     if (userType !== 'admin' && userType !== 'user' && userType !== 'educator') {

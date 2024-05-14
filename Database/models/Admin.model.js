@@ -4,6 +4,7 @@ const adminSchema = mongoose.Schema({
     name: {
         type: String,
         trim: true,
+        unique:[true, 'name must be unique'],
         required: [true, 'admin name is required'],
         minLength: [1, 'too short admin name']
     },
