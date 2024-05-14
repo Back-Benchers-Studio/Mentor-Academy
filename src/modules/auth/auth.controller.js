@@ -161,6 +161,7 @@ export const signupAll = catchAsyncError(async (req, res, next) => {
 // Sign In
 export const signInAll = catchAsyncError(async (req, res, next) => {
     let { userType } = req.params;
+    console.log('fortest',req)
     let user;
     let newModel;
     if (userType !== 'admin' && userType !== 'user' && userType !== 'educator') {
@@ -175,8 +176,11 @@ export const signInAll = catchAsyncError(async (req, res, next) => {
             newModel = educatorModel;
         }
     }
-    user = await newModel.findOne({ email: req.body.email }) || await newModel.findOne({ name: req.body.email }) ;
 
+    user = await newModel.findOne({ email: req.body.email });
+    if(!user){
+        user = await newModel.findOne({ name: req.body.name });
+    }
     if (!user || !(await bcrypt.compare(req.body.password, user.password))) {
         return next(new AppError(`Incorrect Email or Password`, 400));
     } else if ((!user.verified || user.isBlocked) && userType === 'user') {

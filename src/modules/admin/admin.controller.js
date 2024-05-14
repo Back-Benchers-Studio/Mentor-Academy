@@ -183,6 +183,7 @@ export const changeUserPassword = catchAsyncError(async (req, res, next) => {
     res.status(200).json({ message: "success", result })
 })
 
+
 export const resetPassword = catchAsyncError(async (req, res, next) => {
     if (!req.params.token || !req.body.password) {
         return next(new AppError(`Please provide token and password in request body`, 400));
@@ -210,5 +211,9 @@ export const resetPassword = catchAsyncError(async (req, res, next) => {
     user.passwordResetExpires = null;
     await user.save();
     res.status(200).json({ message: "success", user })
+})
+
+export const checkAdmin = catchAsyncError(async (req, res, next) => {
+    res.status(200).json({ admin:true })
 })
 
