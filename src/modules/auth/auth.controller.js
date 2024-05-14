@@ -46,7 +46,17 @@ export const verifyPayment = catchAsyncError(async (req, res, next) => {
     return res.status(200).json({ message: "success" })
 })
 
-
+export const checkEducator = catchAsyncError(async (req, res, next) => {
+    let educatorIsFound;
+    if (req.body.educator) {
+        educatorIsFound = await educatorModel.findOne({ educator_id: req.body.educator });
+        if (!educatorIsFound) {
+            return next(new AppError('Educator not found', 404));
+        }else{
+            res.status(200).json({ found:true });
+        }
+    }
+})
 
 export const signupAll = catchAsyncError(async (req, res, next) => {
     let { userType } = req.params;
@@ -165,7 +175,7 @@ export const signInAll = catchAsyncError(async (req, res, next) => {
             newModel = educatorModel;
         }
     }
-    user = await newModel.findOne({ email: req.body.email });
+    user = await newModel.findOne({ email: req.body.email }) || await newModel.findOne({ name: req.body.email }) ;
 
     if (!user || !(await bcrypt.compare(req.body.password, user.password))) {
         return next(new AppError(`Incorrect Email or Password`, 400));
