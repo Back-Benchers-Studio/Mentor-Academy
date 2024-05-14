@@ -7,13 +7,15 @@ import adminRouter from "./admin/admin.router.js"
 import announcementRouter from "./announcement/announcement.router.js"
 import courseRouter from "./course/course.router.js"
 import walletRouter from "./wallet/wallet.router.js"
+import sessionRouter from "./session/session.router.js"
 export function init(app) {
   
     app.use('/api/v1/auth', authRouter)
     app.use('/api/v1', adminRouter)
     app.use('/api/v1/announcement',announcementRouter)
     app.use('/api/v1/course',courseRouter)
-    app.use('/api/v1/users', userRouter)
+    app.use('/api/v1/session', sessionRouter)
+    app.use('/api/v1/user', userRouter)
     app.use('/api/v1/deposits', depositRouter)
     app.use('/api/v1/wallet', walletRouter)
   

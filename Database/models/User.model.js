@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import bcrypt from "bcrypt"
+
 const userSchema = mongoose.Schema({
     name: {
         type: String,
@@ -29,11 +30,11 @@ const userSchema = mongoose.Schema({
        // required: [true, 'phone number is required'],
 
     },
-    balance:{
-        type: Number,
-        default: 0
+    // balance:{
+    //     type: Number,
+    //     default: 0
 
-    },
+    // },
     email: {
         type: String,
         trim: true,

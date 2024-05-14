@@ -33,7 +33,7 @@ export const verifyPayment = catchAsyncError(async (req, res, next) => {
         if (!educator) {
             return next(new AppError('Educator not found', 404));
         }
-        // Create a wallet for the educator and link it to the educator
+        // Create a wallet with commition 10 $ (@todo will change) for the educator and link it to the educator
         let wallet = new walletModel({ educator: educator._id, balance: 10 });
         await wallet.save();
         // Link the wallet to the educator
@@ -103,7 +103,7 @@ export const signupAll = catchAsyncError(async (req, res, next) => {
                     {
                         price_data: {
                             currency: 'usd',
-                            unit_amount: 10000,
+                            unit_amount: 100 * 100,
                             product_data: {
                                 name: newUser.name,
                             },
@@ -151,6 +151,7 @@ export const signupAll = catchAsyncError(async (req, res, next) => {
 // Sign In
 export const signInAll = catchAsyncError(async (req, res, next) => {
     let { userType } = req.params;
+    const { email, password } = req.body
     let user;
     let newModel;
     if (userType !== 'admin' && userType !== 'user' && userType !== 'educator') {
@@ -166,81 +167,45 @@ export const signInAll = catchAsyncError(async (req, res, next) => {
         }
     }
     user = await newModel.findOne({ email: req.body.email });
-
-    if (!user || !(await bcrypt.compare(req.body.password, user.password))) {
-        return next(new AppError(`Incorrect Email or Password`, 400));
-    } else if ((!user.verified || user.isBlocked) && userType === 'user') {
-        if (user.isBlocked) {
-            return next(new AppError(`Your Email has Been Blocked We Will Contact You SOON...`, 400));
+    console.log({ userInfo: user })
+    if (userType === 'user') {
+        // console.log({user:!user})
+        // console.log({userPassBody:password})
+        //console.log({userPassBodyEnc:bcrypt.hashSync(password,7)})
+        //console.log({userPass:user.password})
+        //console.log({userPassBody:req.body.password})
+        console.log({password:!(await bcrypt.compare(password, user.password))})
+        if (!user || (await bcrypt.compare(req.body.password, user.password))) {
+            return next(new AppError(`Incorrect Email or Password`, 400));
+        } else if ((!user.verified || user.isBlocked) && userType === 'user') {
+            if (user.isBlocked) {
+                return next(new AppError(`Your Email has Been Blocked We Will Contact You SOON...`, 400));
+            }
+            return next(new AppError(`Please  Complete Payment Step First ...`, 400));
+        } else if (user.isBlocked && userType === 'educator') {
+            if (user.isBlocked) {
+                return next(new AppError(`Your Email has Been Blocked We Will Contact You SOON...`, 400));
+            }
         }
-        return next(new AppError(`Please  Complete Payment Step First ...`, 400));
-    } else if (user.isBlocked && userType === 'educator') {
-        if (user.isBlocked) {
-            return next(new AppError(`Your Email has Been Blocked We Will Contact You SOON...`, 400));
+        let token = jwt.sign({ name: user.name, userId: user._id, type: userType }, process.env.JWT_KEY);
+        res.status(200).json({ token })
+    }else{
+        if (!user || !(await bcrypt.compare(req.body.password, user.password))) {
+            return next(new AppError(`Incorrect Email or Password`, 400));
+        } else if ((!user.verified || user.isBlocked) && userType === 'user') {
+            if (user.isBlocked) {
+                return next(new AppError(`Your Email has Been Blocked We Will Contact You SOON...`, 400));
+            }
+            return next(new AppError(`Please  Complete Payment Step First ...`, 400));
+        } else if (user.isBlocked && userType === 'educator') {
+            if (user.isBlocked) {
+                return next(new AppError(`Your Email has Been Blocked We Will Contact You SOON...`, 400));
+            }
         }
+        let token = jwt.sign({ name: user.name, userId: user._id, type: userType }, process.env.JWT_KEY);
+        res.status(200).json({ token })
     }
-    // else if (!user.verified && userType ==='admin'){
-    //     return next(new AppError(`Your Account is not verified...`, 400));
-    // }
-    let token = jwt.sign({ name: user.name, userId: user._id, type: userType }, process.env.JWT_KEY);
-    res.status(200).json({ token })
 })
-
-
-
-// export const signup = catchAsyncError(async (req, res, next) => {
-//     // const { educator, name, email, password } = req.body;
-
-//     if (req.body.educator) {
-//         // Check if the educator exists
-//         const educatorIsFound = await educatorModel.findOne({ educator_id: req.body.educator });
-//         if (!educatorIsFound) {
-//             return next(new AppError('Educator not found', 404));
-//         }
-
-//         // Check if the email already exists
-//         const existingUser = await userModel.findOne({ email: req.body.email });
-//         if (existingUser) return next(new AppError('Email already exists', 409))
-//         let user = new userModel(req.body)
-//         await user.save()
-//         res.json({ message: "success", user, educatorIsFound })
-//     }
-//     else {
-//         // Check if the email already exists
-//         const existingUser = await userModel.findOne({ email: req.body.email });
-//         if (existingUser) return next(new AppError('Email already exists', 409))
-//         // let isFound = await userModel.findOne({ email: req.body.email })
-//         // if (isFound) return next(new AppError('email already exists', 409))
-//         let user = new userModel(req.body)
-//         await user.save()
-//         res.json({ message: "success", user })
-//     }
-
-// })
-
-// export const signupEducator = catchAsyncError(async (req, res, next) => {
-//     let isFound = await educatorModel.findOne({ email: req.body.email })
-//     if (isFound) return next(new AppError('email already exists', 409))
-//     let educator = new educatorModel(req.body)
-//     await educator.save()
-//     res.json({ message: "success", educator })
-// })
-
-
-
-// export const signIn = catchAsyncError(async (req, res, next) => {
-//     const { email, password } = req.body
-//     let isFound = await userModel.findOne({ email })
-//     if (!isFound) return next(new AppError('incorrect email or password', 401))
-//     const match = await bcrypt.compare(password, isFound.password);
-//     if (isFound && match) {
-//         let token = jwt.sign({ name: isFound.name, userId: isFound._id, role: isFound.role }, process.env.JWT_KEY)
-//         return res.json({ message: "success", token })
-//     }
-//     next(new AppError('incorrect email or password', 401))
-// })
-
-
 
 export const protectedRoutes = catchAsyncError(async (req, res, next) => {
     const { token } = req.headers;
@@ -285,25 +250,6 @@ export const protectedRoutes = catchAsyncError(async (req, res, next) => {
     //req.model = model; 
     next();
 });
-// export const protectedRoutes = catchAsyncError(async (req, res, next) => {
-//     let { token } = req.headers
-//     if (!token) return next(new AppError('token not provided', 401))
-
-//     let decoded = await jwt.verify(token, process.env.JWT_KEY)
-
-//     let user = await userModel.findById(decoded.userId)
-//     if (!user) return next(new AppError('user not found', 401))
-
-//     if (user.passwordChangedAt) {
-//         let changePasswordDate = parseInt(user.passwordChangedAt.getTime() / 1000)
-//         if (changePasswordDate > decoded.iat) return next(new AppError('password changed', 401))
-//     }
-
-//     req.user = user
-//     next()
-// })
-
-// to handle Authorization
 
 export function allowedTo(...roles) {
     return catchAsyncError(async (req, res, next) => {

@@ -7,7 +7,7 @@ import crypto from 'crypto';
 
 
 
-const getAllUsers = catchAsyncError(async (req, res, next) => {
+export const getAllUsers = catchAsyncError(async (req, res, next) => {
 
     let apiFeatures = new ApiFeatures(userModel.find(), req.query)
         .paginate().fields().filter().search().sort()
@@ -18,7 +18,7 @@ const getAllUsers = catchAsyncError(async (req, res, next) => {
 
 })
 
-const getUser = catchAsyncError(async (req, res, next) => {
+export const getUser = catchAsyncError(async (req, res, next) => {
     const { id } = req.params
     let result = await userModel.findById(id)
     result.password = undefined
@@ -26,7 +26,7 @@ const getUser = catchAsyncError(async (req, res, next) => {
     result && res.status(200).json({ message: "success", result })
 })
 
-const changeUserPassword = catchAsyncError(async (req, res, next) => {
+export const changeUserPassword = catchAsyncError(async (req, res, next) => {
     const { id } = req.params
 
     let result = await userModel.findById(id)
@@ -52,7 +52,7 @@ const changeUserPassword = catchAsyncError(async (req, res, next) => {
    res.status(200).json({ message: "success", result })
 })
 
-const resetPassword = catchAsyncError(async (req, res, next) => {
+export const resetPassword = catchAsyncError(async (req, res, next) => {
     if(!req.params.token || !req.body.password){
         return next(new AppError(`Please provide token and password in request body`, 400));
     }
@@ -81,38 +81,19 @@ const resetPassword = catchAsyncError(async (req, res, next) => {
     res.status(200).json({ message: "success", user })
 })
 
-
-const banUser = catchAsyncError(async (req, res, next) => {
-    const { id } = req.params
-    let result = await userModel.findByIdAndUpdate(id, { isActive: false }, { new: true })
-    !result && next(new AppError(`User not found`), 404)
-    result && res.status(200).json({ message: "success", result })
-
-    const userEmail = result.email;
-    const html = `<h1>Your Account has been banned</h1>`;
-    const subject = `Account Banning`;
-    sendEmail(userEmail, html, subject);
-})
-
-const unbanUser = catchAsyncError(async (req, res, next) => {
-    const { id } = req.params
-    let result = await userModel.findByIdAndUpdate(id, { isActive: true }, { new: true })
-    !result && next(new AppError(`User not found`), 404)
-    result && res.status(200).json({ message: "success", result })
-
-    const userEmail = result.email;
-    const html = `<h1>Your Account has been unbanned</h1>`;
-    const subject = `Account UnBanning`;
-    sendEmail(userEmail, html, subject);
-})
+//update user profile
+export const updateUserProfile = catchAsyncError(async (req, res) => {
+    const userID = req.user._id;
+    const user = await userModel.findById(userID);
+    if (user) {
+      const newUser = await userModel.findByIdAndUpdate(userID, req.body, { new: true });
+      res.status(200).json({ newUser, message: "your profile has been updated" });
+    } else {
+      res.status(404).json({ message: "can not update your profile" })
+    }
+  });
 
 
-export {
-    getAllUsers,
-    getUser,
-    banUser,
-    unbanUser,
-    changeUserPassword,
-    resetPassword,
-}
+
+
 

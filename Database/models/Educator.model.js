@@ -19,12 +19,10 @@ const educatorSchema = mongoose.Schema({
     phone: {
         type: String,
        // required: [true, 'phone number is required'],
-
     },
-    balance:{
-        type: Number,
-        default: 0
-
+    bankAcount: {
+        type: String,
+        required: true,
     },
     email: {
         type: String,

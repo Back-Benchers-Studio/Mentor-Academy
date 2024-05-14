@@ -12,11 +12,6 @@ const adminSchema = mongoose.Schema({
        // required: [true, 'phone number is required'],
 
     },
-    balance:{
-        type: Number,
-        default: 0
-
-    },
     email: {
         type: String,
         trim: true,
