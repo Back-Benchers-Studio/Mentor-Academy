@@ -179,7 +179,7 @@ export const signInAll = catchAsyncError(async (req, res, next) => {
 
     user = await newModel.findOne({ email: req.body.email });
     if(!user){
-        user = await newModel.findOne({ name: req.body.name });
+        user = await newModel.findOne({ name: req.body.email });
     }
     if (!user || !(await bcrypt.compare(req.body.password, user.password))) {
         return next(new AppError(`Incorrect Email or Password`, 400));
@@ -327,6 +327,5 @@ export function allowedTo(...roles) {
         next()
     })
 }
-
 
 
