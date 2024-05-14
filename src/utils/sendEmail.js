@@ -5,9 +5,9 @@ export const sendEmail = async (email , htmlBody , subject)=>{
         // create reusable transporter object using the default SMTP transport
         let transporter = nodemailer.createTransport({
             host: "smtp.ethereal.email",
-            port: 465,
-            secure: true, // true for 465, false for other ports
-            service: 'gmail',
+            port: 587,
+            secure: false, // true for 465, false for other ports
+            service:"gmail",
             auth: {
                 user: 'backbenchersteam23@gmail.com',
                 pass:'Mazen.00.00.00'

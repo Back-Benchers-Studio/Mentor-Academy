@@ -7,7 +7,7 @@ const adminRouter = express.Router()
 
 adminRouter
     .route('/users')
-    .get(protectedRoutes,user.getAllUsers)
+    .get(protectedRoutes,allowedTo('admin'),user.getAllUsers)
 
 adminRouter.post('/sendMail',protectedRoutes,allowedTo('admin'),user.sendMailtoAll) 
 adminRouter.post('/checkAdmin',protectedRoutes,allowedTo('admin'),user.checkAdmin) 

@@ -13,7 +13,7 @@ const announcementSchema = new mongoose.Schema({
     },
     DeliverDate: { 
         type: String,
-        required: [true, 'DeliverDate is required']
+        required: [false, 'DeliverDate is required']
     },
 }
 ,{ timestamps: true })
