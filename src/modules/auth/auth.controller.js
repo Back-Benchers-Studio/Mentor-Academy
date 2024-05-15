@@ -7,7 +7,6 @@ import { educatorModel } from "../../../Database/models/Educator.model.js";
 import { adminModel } from "../../../Database/models/Admin.model.js";
 import { sendEmail } from '../../utils/sendEmail.js';
 import Stripe from 'stripe';
-import { depositModel } from "../../../Database/models/Deposit.model.js";
 import { walletModel } from "../../../Database/models/Wallet.model.js";
 const stripe = new Stripe(`${process.env.STRIPE_KEY}`);
 
@@ -47,17 +46,41 @@ export const verifyPayment = catchAsyncError(async (req, res, next) => {
 })
 
 export const checkEducator = catchAsyncError(async (req, res, next) => {
-    let educatorIsFound;
-    if (req.body.educator) {
-        educatorIsFound = await educatorModel.findOne({ educator_id: req.body.educator });
-        if (!educatorIsFound) {
-            return next(new AppError('Educator not found', 404));
-        }else{
-            res.status(200).json({ found:true });
-        }
+    const educatorId = req.user._id; 
+    // Check if the user is an educator
+    const educator = await educatorModel.findById(educatorId);
+    if (!educator) {
+      return res.status(401).json({ message: 'This is not an educator' });
     }
-})
+    else{
+        res.status(200).json({ Educator: educator });
+    }
+  });
 
+  export const checkAdmin = catchAsyncError(async (req, res, next) => {
+    const adminId = req.user._id; 
+    // Check if the user is an admin
+    const admin = await adminModel.findById(adminId);
+    if (!admin) {
+      return res.status(401).json({ message: 'This is not an admin' });
+    }
+    else{
+        res.status(200).json({ Admin: admin });
+    }
+  });
+  export const checkUser = catchAsyncError(async (req, res, next) => {
+    const userId = req.user._id; 
+    // Check if the user is a usual user
+    const user = await userModel.findById(userId);
+    if (!user) {
+      return res.status(401).json({ message: 'This is not usual user' });
+    }
+    else{
+        res.status(200).json({ User: user });
+    }
+  });
+
+// Sign Up
 export const signupAll = catchAsyncError(async (req, res, next) => {
     let { userType } = req.params;
     let user;

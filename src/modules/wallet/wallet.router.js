@@ -3,10 +3,7 @@ import express from "express"
 import * as wallet from "./wallet.controller.js"
 import { allowedTo, protectedRoutes } from "../auth/auth.controller.js"
 
-
-
 const walletRouter = express.Router()
-
 
 // walletRouter
 //     .route('/')

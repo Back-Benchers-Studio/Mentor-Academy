@@ -5,6 +5,7 @@ import morgan from "morgan";
 import dbConnection from './Database/DBConnection.js'
 import { init } from './src/modules/index.router.js';
 import cors from "cors"
+//import * as zoomRouter  from "./src/modules/zoom/zoom.controller.js";
 
 dotenv.config()
 const app = express()
@@ -17,6 +18,7 @@ if (process.env.MODE == 'development') {
 }
 
 init(app)
+
 
 // app.get('/',async (req,res)=>{
 //     const code = req.query.code;
@@ -158,6 +160,11 @@ init(app)
 
 
 
+
+
+
+
+
 // Twilio Room Meeting
 
 // import { v4 as uuidv4 } from 'uuid';
@@ -228,6 +235,7 @@ init(app)
 
 
 dbConnection()
+//app.use("/zoomapi", zoomRouter);
 app.listen(process.env.PORT || port, () => console.log(`Example app listening on port ${port}!`))
 
 

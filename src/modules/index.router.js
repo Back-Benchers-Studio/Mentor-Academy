@@ -8,6 +8,7 @@ import announcementRouter from "./announcement/announcement.router.js"
 import courseRouter from "./course/course.router.js"
 import walletRouter from "./wallet/wallet.router.js"
 import sessionRouter from "./session/session.router.js"
+import zoomRouter from "./zoom/zoom.router.js"
 export function init(app) {
   
     app.use('/api/v1/auth', authRouter)
@@ -18,7 +19,7 @@ export function init(app) {
     app.use('/api/v1/user', userRouter)
     app.use('/api/v1/deposits', depositRouter)
     app.use('/api/v1/wallet', walletRouter)
-  
+    app.use('/api/v1/zoom', zoomRouter)
 
     app.all('*', (req, res, next) => {
         next(new AppError(`can't find this route: ${req.originalUrl}`), 404)
