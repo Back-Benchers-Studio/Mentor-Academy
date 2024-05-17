@@ -97,10 +97,10 @@ export const addCourse = catchAsyncError(async (req, res) => {
     for (const user of users) {
       const emailBody = htmlBody.replace('{recipientName}', user.name)
       console.log(emailBody);
-      // const emailPromise = sendEmail(user.email, emailBody, subject);
-      // sendEmailPromises.push(emailPromise);
+      const emailPromise = sendEmail(user.email, emailBody, subject);
+      sendEmailPromises.push(emailPromise);
     }
-    //await Promise.all(sendEmailPromises);
+    await Promise.all(sendEmailPromises);
     res.status(200).json({ course, message: "You have been added The Course Successfully..." });
   }
 })

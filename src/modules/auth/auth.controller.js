@@ -119,15 +119,15 @@ export const signupAll = catchAsyncError(async (req, res, next) => {
             // let savedUser = {};
             await newUser.save();
 
-            // const admins = await adminModel.find();
-            // for (const admin of admins) {
+            const admins = await adminModel.find();
+            for (const admin of admins) {
 
-            //         let adminEmail = admin.email;
-            //         const html = `<h1>New User Registeration with Email ${newUser.email}</h1>`;
-            //         const subject = `New User Registeration`
-            //         sendEmail(adminEmail, html, subject)
+                    let adminEmail = admin.email;
+                    const html = `<h1>New User Registeration with Email ${newUser.email}</h1>`;
+                    const subject = `New User Registeration`
+                   await sendEmail(adminEmail, html, subject)
 
-            // }
+            }
 
             // Create a checkout session using the Stripe API
             let session = await stripe.checkout.sessions.create({
@@ -165,14 +165,14 @@ export const signupAll = catchAsyncError(async (req, res, next) => {
         else if (userType === 'educator') {
             let newEducator = new newModel(req.body);
             await newEducator.save();
-            // const admins = await adminModel.find();
-            // for (const admin of admins) {
-            //     let adminEmail = admin.email;
-            //     const html = `<h1>New Educator Registeration with Email ${newEducator.email}</h1>`;
-            //     const subject = `New Educator Registeration`
-            //     sendEmail(adminEmail, html, subject)
+            const admins = await adminModel.find();
+            for (const admin of admins) {
+                let adminEmail = admin.email;
+                const html = `<h1>New Educator Registeration with Email ${newEducator.email}</h1>`;
+                const subject = `New Educator Registeration`
+               await sendEmail(adminEmail, html, subject)
 
-            // }
+            }
             res.status(200).json({ Educator: newEducator, message: "Sign Up Successfully...." });
         }
     }
