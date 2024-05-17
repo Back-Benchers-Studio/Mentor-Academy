@@ -9,12 +9,12 @@ const announcementRouter = express.Router()
 
 
 announcementRouter.route('/')
-                  .post(protectedRoutes,allowedTo('educator'),announcement.addAnnouncement)
+                  .post(protectedRoutes,allowedTo('admin','educator'),announcement.addAnnouncement)
                   .get(protectedRoutes,allowedTo('admin' , 'educator' ,'user'),announcement.getAnnouncements)
 
 announcementRouter.route('/:id').
-                     patch(protectedRoutes,allowedTo('educator'),announcement.updateAnnouncement)
-                    .delete(protectedRoutes,allowedTo('educator'),announcement.deleteAnnouncement)
+                     patch(protectedRoutes,allowedTo('admin','educator'),announcement.updateAnnouncement)
+                    .delete(protectedRoutes,allowedTo('admin','educator'),announcement.deleteAnnouncement)
                     .get(protectedRoutes,allowedTo('admin' , 'educator' ,'user'),announcement.getAnnouncementByID)
 
 
